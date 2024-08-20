@@ -1,5 +1,6 @@
 # Pomodoro Timer Chrome Extension
 ![Alt text](/Screenshot.png)
+
 A simple and effective Pomodoro timer Chrome extension to help you stay productive and manage your time efficiently.
 
 
