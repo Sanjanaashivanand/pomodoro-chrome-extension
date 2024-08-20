@@ -1,6 +1,7 @@
 # Pomodoro Timer Chrome Extension
-A simple and effective Pomodoro timer Chrome extension to help you stay productive and manage your time efficiently.
 ![Alt text](/Screenshot.png)
+A simple and effective Pomodoro timer Chrome extension to help you stay productive and manage your time efficiently.
+
 
 
 ## Table of Contents
