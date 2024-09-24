@@ -1,53 +1,57 @@
-const startEle = document.getElementById("start") 
-const stopEle = document.getElementById("stop")
-const reset = document.getElementById("reset")
-const timerEle = document.getElementById("timer")
-const headlineEle = document.getElementById("headline")
+const startTimerBtn = document.getElementById("start")
 
-let interval 
-let IsBreak = false
-let remainingTime = IsBreak ? 300 : 1500
-headlineEle.innerHTML= IsBreak ? "Break Time" : "Study Time"
+startTimerBtn.addEventListener("click", () => {
+    chrome.storage.local.get(["isRunning"], (res) => {
+        chrome.storage.local.set({
+            isRunning: !res.isRunning,
+        }, () => {
+            startTimerBtn.textContent = res.isRunning ? "Stop" : "Start"
+        })
+    })
+})
 
-function updateTime(){
-    let mins = Math.floor(remainingTime/60)
-    let secs = remainingTime%60
-    let time = `${mins.toString().padStart(2, "0")}` + ":" + `${secs.toString().padStart(2, "0")}`
+const resetTimerBtn = document.getElementById("reset")
 
-    timerEle.innerHTML = time
-}
+resetTimerBtn.addEventListener("click", () => {
+    chrome.storage.local.get(["isRunning", "timer"], (res) => {
+        chrome.storage.local.set({
+            isRunning: false,
+            timer: 0
+        }, () => {
+            startTimerBtn.textContent = "Start"
+        })
+    })
+})
 
-function startTimer(){
-    interval = setInterval(()=>{
-        remainingTime--;
-        updateTime();
-        if(remainingTime == 0){
-            clearInterval(interval);
-            if(IsBreak){
-                alert("Time to get back to work!")
-            }
-            else{
-                alert("God job! You deserve a break")
-            }
-            IsBreak = !IsBreak
-            remainingTime=  IsBreak ? 300 : 1500
-            headlineEle.innerHTML= IsBreak ? "Break Time" : "Study Time";
-            updateTime();
+const skipBtn = document.getElementById("skip")
+
+skipBtn.addEventListener("click", () => {
+    chrome.storage.local.get(["isRunning", "timer", "isBreak"], (res)=>{
+        chrome.storage.local.set({
+            isRunning: false,
+            isBreak: !res.isBreak,
+            timer: 0,
+        }, () => {
+            updateTime()
+        })
+    })
+})
+
+
+function updateTime() {
+    chrome.storage.local.get(["timer", "workTime", "breakTime", "isBreak"], (res) => {
+        let displayTime = res.isBreak ? res.breakTime : res.workTime;
+        const heading = document.getElementById("headline");
+        heading.textContent = res.isBreak ? "Break Time! :)" : "Productivity Time!"
+        const timer = document.getElementById("timer");
+        const minutes = `${displayTime - Math.ceil(res.timer / 60)}`.padStart(2, "0");
+        let seconds = "00"
+        if(res.timer % 60!=0){
+            seconds = `${60 - res.timer % 60}`.padStart(2, "0");
         }
-    },1000)
+        timer.textContent = `${minutes}:${seconds}`;
+    })
 }
 
-function stopTimer(){
-    headlineEle.innerHTML= IsBreak ? "Break Time" : "Study Time";
-    clearInterval(interval);
-}
-
-function resetTimer(){
-    clearInterval(interval);
-    remainingTime=  IsBreak ? 300 : 1500
-    updateTime();
-}
-
-startEle.addEventListener("click", startTimer)
-stopEle.addEventListener("click", stopTimer)
-reset.addEventListener("click",resetTimer)
+updateTime()
+setInterval(updateTime,1000)
